@@ -21,26 +21,33 @@ app.get("/", (req, res) => {
 
 app.post("/corregir", async (req, res) => {
   try {
-    const { mensaje } = req.body;
+    const texto = req.body.texto;
 
-    if (!mensaje) {
+    if (!texto || texto.trim() === "") {
       return res.status(400).json({
-        error: "No se recibió ningún mensaje.",
+        error: "No se recibió ningún texto.",
       });
     }
 
-    const completion = await openai.responses.create({
-      model: "gpt-4.1-mini",
-      input: `Corregí ortografía, puntuación, tildes, gramática y claridad del siguiente mensaje en español. 
-No cambies el sentido, solo mejoralo para que quede prolijo, natural y bien escrito.
-Mensaje: "${mensaje}"`,
+    const respuesta = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "Sos un corrector de mensajes de WhatsApp para un delegado gremial. Corregís ortografía, tildes, puntuación y redacción. Mantenés un tono claro, cercano y firme. No agregás información nueva. Devolvés solo el mensaje corregido.",
+        },
+        {
+          role: "user",
+          content: texto,
+        },
+      ],
+      temperature: 0.3,
     });
 
-    const corregido = completion.output_text;
+    const corregido = respuesta.choices[0].message.content.trim();
 
-    res.json({
-      corregido,
-    });
+    res.json({ corregido });
   } catch (error) {
     console.error("Error OpenAI:", error);
     res.status(500).json({
