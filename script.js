@@ -15,12 +15,12 @@ corregirBtn.addEventListener("click", async () => {
   outputText.value = "Corrigiendo...";
 
   try {
-    const respuesta = await fetch("http://localhost:3000/corregir", {
+    const respuesta = await fetch("/corregir", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ texto: texto }),
+      body: JSON.stringify({ texto }),
     });
 
     const data = await respuesta.json();
